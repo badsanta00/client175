@@ -1,0 +1,64 @@
+<!--
+        Client175
+        
+        Copyright 2009 Chris Seickel <chris@chris-laptop>
+        
+        This program is free software; you can redistribute it and/or modify
+        it under the terms of the GNU General Public License as published by
+        the Free Software Foundation; either version 2 of the License, or
+        (at your option) any later version.
+        
+        This program is distributed in the hope that it will be useful,
+        but WITHOUT ANY WARRANTY; without even the implied warranty of
+        MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+        GNU General Public License for more details.
+        
+        You should have received a copy of the GNU General Public License
+        along with this program; if not, write to the Free Software
+        Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
+        MA 02110-1301, USA.
+-->
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+
+<head>
+	<title>Client175</title>
+	<meta http-equiv="content-type" content="text/html;charset=utf-8" />
+	<meta name="generator" content="Geany 0.16" />
+	
+    <!-- Ext base stylesheet -->	
+    <link rel="stylesheet" type="text/css" href="ext/resources/css/ext-all.css" />
+    
+    <!-- Theme includes -->
+    <link rel="stylesheet" type="text/css" title="ambience"	href="ext/resources/css/xtheme-ambience.css" />
+    <link rel="stylesheet" type="text/css" title="blue"		href="ext/resources/css/xtheme-blue.css" /> 
+    <link rel="stylesheet" type="text/css" title="gray"		href="ext/resources/css/xtheme-gray.css" />
+    <link rel="stylesheet" type="text/css" title="grayx"	href="ext/resources/css/xtheme-gray-extend.css" />
+    <link rel="stylesheet" type="text/css" title="slate"    href="ext/resources/css/xtheme-slate.css" />
+    <link rel="stylesheet" type="text/css" title="dcs"      href="ext/resources/css/xtheme-dcs.css" />
+    <link rel="stylesheet" type="text/css" title="human"	href="ext/resources/css/xtheme-human.css" />
+    <link rel="stylesheet" type="text/css" title="tp"		href="ext/resources/css/xtheme-tp.css" />
+
+    <!-- Client175 specific stylesheet -->	
+    <link rel="stylesheet" type="text/css" href="style.css" />
+    <link rel="stylesheet" type="text/css" href="tb_btn_fix.css" />
+    
+    <script src="ext/ext-base.js"></script>
+    <script src="ext/ext-all-debug.js"></script>
+    <script src="ext/ux/Ext.ux.state.LocalStorage.js"></script>
+    <script src="ext/ux/SearchField.js"></script>
+    <script src="ext/ux/Ext.ux.PanelCollapsedTitle.js"></script>
+    <script src="ext/ux/styleswitcher.js"></script>
+    <script src="mpd.js"></script>
+    <script src="mpd.util.js"></script>
+    <script src="mpd.browser.js"></script>
+    <script src="mpd.controls.js"></script>
+    <script src="mpd.sidebar.js"></script>
+    <script src="main.js"></script>
+</head>
+
+<body>
+</body>
+</html>

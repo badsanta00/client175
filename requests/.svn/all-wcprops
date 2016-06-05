@@ -1,0 +1,113 @@
+K 25
+svn:wc:ra_dav:version-url
+V 32
+/svn/!svn/ver/139/trunk/requests
+END
+AUTHORS.rst
+K 25
+svn:wc:ra_dav:version-url
+V 44
+/svn/!svn/ver/139/trunk/requests/AUTHORS.rst
+END
+sessions.py
+K 25
+svn:wc:ra_dav:version-url
+V 44
+/svn/!svn/ver/139/trunk/requests/sessions.py
+END
+defaults.py
+K 25
+svn:wc:ra_dav:version-url
+V 44
+/svn/!svn/ver/139/trunk/requests/defaults.py
+END
+api.py
+K 25
+svn:wc:ra_dav:version-url
+V 39
+/svn/!svn/ver/139/trunk/requests/api.py
+END
+async.py
+K 25
+svn:wc:ra_dav:version-url
+V 41
+/svn/!svn/ver/139/trunk/requests/async.py
+END
+exceptions.py
+K 25
+svn:wc:ra_dav:version-url
+V 46
+/svn/!svn/ver/139/trunk/requests/exceptions.py
+END
+HISTORY.rst
+K 25
+svn:wc:ra_dav:version-url
+V 44
+/svn/!svn/ver/139/trunk/requests/HISTORY.rst
+END
+safe_mode.py
+K 25
+svn:wc:ra_dav:version-url
+V 45
+/svn/!svn/ver/139/trunk/requests/safe_mode.py
+END
+hooks.py
+K 25
+svn:wc:ra_dav:version-url
+V 41
+/svn/!svn/ver/139/trunk/requests/hooks.py
+END
+compat.py
+K 25
+svn:wc:ra_dav:version-url
+V 42
+/svn/!svn/ver/139/trunk/requests/compat.py
+END
+structures.py
+K 25
+svn:wc:ra_dav:version-url
+V 46
+/svn/!svn/ver/139/trunk/requests/structures.py
+END
+models.py
+K 25
+svn:wc:ra_dav:version-url
+V 42
+/svn/!svn/ver/139/trunk/requests/models.py
+END
+LICENSE
+K 25
+svn:wc:ra_dav:version-url
+V 40
+/svn/!svn/ver/139/trunk/requests/LICENSE
+END
+cookies.py
+K 25
+svn:wc:ra_dav:version-url
+V 43
+/svn/!svn/ver/139/trunk/requests/cookies.py
+END
+__init__.py
+K 25
+svn:wc:ra_dav:version-url
+V 44
+/svn/!svn/ver/139/trunk/requests/__init__.py
+END
+utils.py
+K 25
+svn:wc:ra_dav:version-url
+V 41
+/svn/!svn/ver/139/trunk/requests/utils.py
+END
+status_codes.py
+K 25
+svn:wc:ra_dav:version-url
+V 48
+/svn/!svn/ver/139/trunk/requests/status_codes.py
+END
+auth.py
+K 25
+svn:wc:ra_dav:version-url
+V 40
+/svn/!svn/ver/139/trunk/requests/auth.py
+END
