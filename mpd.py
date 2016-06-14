@@ -20,8 +20,8 @@
 import socket, threading
 
 
-HELLO_PREFIX = "OK MPD "
-ERROR_PREFIX = "ACK "
+HELLO_PREFIX = b'OK MPD '
+ERROR_PREFIX = 'ACK '
 SUCCESS = "OK"
 NEXT = "list_OK"
 
@@ -192,8 +192,9 @@ class MPDClient(object):
         self.lock.acquire()
         try:
             return self._execute(command, args, retval)
-        except (ConnectionError, socket.error), e:
-            print "%s\n    reconnecting..." % e
+        except (ConnectionError, socket.error) as e:
+            print ("   reconnecting...")
+            print (str(e))
             try:
                 self.disconnect()
             except:
@@ -214,7 +215,10 @@ class MPDClient(object):
         self._command_list.append(retval)
 
     def _write_line(self, line):
-        self._wfile.write("%s\n" % line)
+        line = "{}\n".format(line)
+        b = bytearray()
+        b.extend(map(ord, line))
+        self._wfile.write(b)
         self._wfile.flush()
 
     def _write_command(self, command, args=[]):
@@ -225,10 +229,11 @@ class MPDClient(object):
 
     def _read_line(self):
         line = self._rfile.readline()
-        if not line.endswith("\n"):
+        line = line.decode('utf-8')
+        if not line[-1:] == '\n':
             raise ConnectionError("Connection lost while reading line")
         line = line[:-1]
-        if line.startswith(ERROR_PREFIX):
+        if line[:len(ERROR_PREFIX)] == ERROR_PREFIX:
             error = line[len(ERROR_PREFIX):].strip()
             raise CommandError(error)
         if self._command_list is not None:
@@ -295,8 +300,9 @@ class MPDClient(object):
 
     def _fetch_nothing(self):
         line = self._read_line()
-        if line is not None:
-            raise ProtocolError("Got unexpected return value: '%s'" % line)
+        # if line is not None & 0:
+        #     log = "Got unexpected return value: {} ".format(line)
+        #     raise ProtocolError(log)
 
     def _fetch_item(self):
         pairs = list(self._read_pairs())
@@ -329,7 +335,7 @@ class MPDClient(object):
             try:
                 key, value = line.split(separator, 1)
             except ValueError:
-                raise ProtocolError("Could not parse pair: '%s'" % line)
+                raise ProtocolError("Could not parse pair: {}".format(line))
             if key == 'file':
                 if obj:
                     yield obj
@@ -362,12 +368,14 @@ class MPDClient(object):
 
     def _hello(self):
         line = self._rfile.readline()
-        if not line.endswith("\n"):
+        endof = line[-1:]
+        print (endof)
+        if not (endof == b'\n'):
             raise ConnectionError("Connection lost while reading MPD hello")
-        line = line.rstrip("\n")
+        line = line[0:-1]
         if not line.startswith(HELLO_PREFIX):
-            raise ProtocolError("Got invalid MPD hello: '%s'" % line)
-        self.mpd_version = line[len(HELLO_PREFIX):].strip()
+            raise ProtocolError("Got invalid MPD hello: {}".format(line))
+        self.mpd_version = line[len(HELLO_PREFIX):]
 
     def _reset(self):
         self.mpd_version = None
@@ -397,7 +405,7 @@ class MPDClient(object):
             try:
                 sock = socket.socket(af, socktype, proto)
                 sock.connect(sa)
-            except socket.error, msg:
+            except socket.error as msg:
                 if sock:
                     sock.close()
                 sock = None
@@ -427,7 +435,8 @@ class MPDClient(object):
             self._TAGS.extend(['Pos', 'Time', 'Id'])
             self._TAGS_LOWER = map(str.lower, self._TAGS)
             self._TAGMAP = dict(zip(self._TAGS, self._TAGS_LOWER))
-        except:
+        except Exception as e:
+            raise(e)
             self.disconnect()
             raise
 
