@@ -98,12 +98,12 @@ class CoverSearch():
         data = urllib.urlopen(self.urlFM % vars).read()
         x = ET.XML(data)
         if len(x) == 0:
-            print 'LASTFM SEARCH: ERROR PARSING LASTFM DATA!'
+            print('LASTFM SEARCH: ERROR PARSING LASTFM DATA!')
             return False
 
         c = x.find('coverart')
         if len(c) == 0:
-            print 'LASTFM SEARCH: NO COVERART NODE IN LASTFM DATA!'
+            print('LASTFM SEARCH: NO COVERART NODE IN LASTFM DATA!')
             return False
 
         for sz in ['large', 'medium', 'small']:
@@ -147,8 +147,8 @@ class CoverSearch():
                     try:
                         shutil.copy2(coverpath, cover_destination)
                     except IOError:
-                        print "Could not save cover to: " + cover_destination
-                        print "For best performance, please ensure that the directory exists and is writable."
+                        print("Could not save cover to: " + cover_destination)
+                        print("For best performance, please ensure that the directory exists and is writable.")
                         h = open(coverpath, 'r')
                         data = h.read()
                         h.close()
@@ -188,8 +188,8 @@ class CoverSearch():
                         h.write(data)
                         h.close()
                     except:
-                        print "Could not save cover to: " + coverpath
-                        print "For best performance, please ensure that the directory exists and is writable."
+                        print("Could not save cover to: " + coverpath)
+                        print("For best performance, please ensure that the directory exists and is writable.")
                         covername = ""
                     return covername, data
             except:

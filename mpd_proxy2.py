@@ -94,12 +94,12 @@ class _Mpd_Poller(threading.Thread):
             try:
                 changes = self.con.idle()
                 _Instance.sync(changes)
-            except Exception, e:
-                print "ERROR IN MPD_POLLER: %s" % e
+            except Exception as e:
+                print("ERROR IN MPD_POLLER: {",e)
                 sleep(1.0)
                 self._connect()
                 _Instance.sync(['startup'])
-        print "Exiting MPD Poller..."
+        print ("Exiting MPD Poller...")
                 
 
 
@@ -163,6 +163,7 @@ class _Mpd_Instance:
         self.con.connect(self._host, self._port, self._password)
 
 
+
     def __getattr__(self, name):
         fn = getattr(self.con, name)
         if name in self._cache_cmds:
@@ -186,7 +187,7 @@ class _Mpd_Instance:
         self.lock.acquire()
         try:
             self.con.command_list_ok_begin()
-        except Exception, e:
+        except Exception as e:
             self.lock.release()
             raise
 
@@ -202,7 +203,7 @@ class _Mpd_Instance:
         if pos is None:
             pos = int(self.state['song'])
         self.command_list_ok_begin()
-        for i in xrange(self._playlistlength-1, -1, -1):
+        for i in range(self._playlistlength-1, -1, -1):
             if i != pos: 
                 self.con.delete(i)
         self.command_list_end()
@@ -221,7 +222,7 @@ class _Mpd_Instance:
         command = ['list', 'album', 'artist', 'David Bowie']
         """
 
-        if isinstance(command, str) or isinstance(command, unicode):
+        if isinstance(command, str) :
             term = re.search('\s\"(.+)\"', command)
             if term:
                 cmdlist = command[:term.start(0)].split(" ")
@@ -244,7 +245,9 @@ class _Mpd_Instance:
         useLower = False
         if sortKey not in ('time', 'pos', 'songs'):
             useLower = True
-        sorted_result = sorted(result, fieldSorter(sortKey, useLower), reverse=sortReverse)
+        #result.sort(key=fieldSorter(sortKey, useLower))
+        #sorted_result=result
+        sorted_result = sorted(result, key=fieldSorter(sortKey), reverse=sortReverse)
         if command in self._cache_cmds:
             self.lock.acquire()
             try:
@@ -287,7 +290,7 @@ class _Mpd_Instance:
             'type': what,
             what: item,
             'time': c['playtime'],
-            'ptime': hmsFromSeconds(c['playtime']),
+            'ptime': c['playtime'],
             'songs': int(c['songs'])
         }
         
@@ -318,9 +321,9 @@ class _Mpd_Instance:
                     'title': item,
                     'type': 'playlist',
                     'playlist': item,
-                    'songs': len(songs),
+                    'songs': len(list(songs)),
                     'time': playtime,
-                    'ptime': hmsFromSeconds(playtime)
+                    'ptime': playtime
                 }
             else:
                 data[index] = {
@@ -365,7 +368,7 @@ class _Mpd_Instance:
             
             
     def load_xspf(self, data):
-        print data
+        print(data)
         x = ET.XML(data)
         urls = x.findall(".//{http://xspf.org/ns/0/}location")
         for url in urls:
@@ -407,7 +410,7 @@ class _Mpd_Instance:
         try:
             self.con.save(playlistName)
             OK = True
-        except MPDError, e:
+        except MPDError as e:
             if '{save} Playlist already exists' in str(e):
                 self.con.rm(playlistName)
                 self.con.save(playlistName)
@@ -472,11 +475,13 @@ class _Mpd_Instance:
             if 'startup' in changes:
                 changes = ['database', 'playlist', 'stored_playlist']
                 
-            print changes
-            s = dict( ((x, None) for x in self.con._TAGS_LOWER) )
-            s.update(self.con.stats())
+            print(self.con._TAGS_LOWER)
+            s = dict()
+            for x in self.con._TAGS_LOWER:
+                s[x] = None
+            #s.update(self.con.stats())
             s.update(self.con.status())
-            if not s.has_key('updating_db'):
+            if 'updating_db' not in s:
                 s['updating_db'] = ''
                 
             t = s.get('time')
@@ -508,8 +513,8 @@ class _Mpd_Instance:
             self.state.update(s)
             self.lastcheck = datetime.utcnow()
             return self.state
-        except Exception, e:
-            print e
+        except Exception as e:
+            print(e)
             raise
         finally:
             self.lock.release()
@@ -544,7 +549,7 @@ def prettyDuration(sec):
 
 
 
-def fieldSorter(field, useLower):
+def fieldSorter(field, useLower=None):
     if useLower:
         def sorter(x, y):
             xt = x['type'] == 'directory'

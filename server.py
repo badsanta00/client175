@@ -20,16 +20,15 @@
 #       MA 02110-1301, USA.
 
 
-import cherrypy, json, os, pwd, urllib, urllib2, sys
-from BeautifulSoup import BeautifulSoup
+import cherrypy, json, os, urllib, sys
+import bs4 as BeautifulSoup
 from time import sleep
 from datetime import datetime, timedelta
+from mpd import MPDClient
 import mpd_proxy2 as mpd_proxy
-from mpd import MPDError
+#from mpd import MPDError
 from covers import CoverSearch
 import requests
-import metadata
-from metadata._base import NotReadable, NotWritable
 
 cherrypy.config.update( {
     'server.thread_pool': 10,
@@ -53,38 +52,43 @@ if LOCAL_COVERS:
 LYRICS_DIR = os.path.join(LOCAL_DIR, "static", "lyrics")
 if not os.path.exists(LYRICS_DIR):
     os.makedirs(LYRICS_DIR)
-    
+
+RUN_AS = "badsanta"
 HOST = "localhost"
 PORT = 6600
 PASSWORD = None
-RUN_AS = pwd.getpwuid(os.getuid())[0]
 
-if os.environ.has_key("MPD_HOST"):
-    mpd_host = str(os.environ["MPD_HOST"])
-    if "@" in mpd_host:
-        mpd_host = mpd_host.split("@")
-        PASSWORD = mpd_host[0]
-        HOST = mpd_host[1]
-    else:
-        HOST = mpd_host
-
-if os.environ.has_key("MPD_PORT"):
-    PORT = int(os.environ["MPD_PORT"])
+    #pwd.getpwuid(os.getuid())[0]
+#
+# if os.environ.has_key("MPD_HOST"):
+#     mpd_host = str(os.environ["MPD_HOST"])
+#     if "@" in mpd_host:
+#         mpd_host = mpd_host.split("@")
+#         PASSWORD = mpd_host[0]
+#         HOST = mpd_host[1]
+#     else:
+#         HOST = mpd_host
+#
+# if os.environ.has_key("MPD_PORT"):
+#     PORT = int(os.environ["MPD_PORT"])
 
 HOST = cherrypy.config.get('mpd_host', HOST)
 PORT = cherrypy.config.get('mpd_port', PORT)
 PASSWORD = cherrypy.config.get('mpd_password', PASSWORD)
 RUN_AS = cherrypy.config.get('run_as', RUN_AS)
 
+print("PORT {}".format(PORT))
+print("PASSWORD " + PASSWORD)
+mpd = mpd_proxy.Mpd(HOST,PORT,PASSWORD)
 
-mpd = mpd_proxy.Mpd(HOST, PORT, PASSWORD)
 mpd.include_playlist_counts = cherrypy.config.get('include_playlist_counts', True)
 cs = CoverSearch(COVERS_DIR, LOCAL_COVERS)
 
 
 class Root:
 
-    os.setuid(pwd.getpwnam(RUN_AS)[2])
+    #os.setuid(pwd.getpwnam(RUN_AS)[2])
+
     static = cherrypy.tools.staticdir.handler(
                 section="/static",
                 dir=os.path.join(LOCAL_DIR, "static"),
@@ -150,7 +154,7 @@ class Root:
                 if ext in ['mp3', 'pgg', 'wav', 'flac', 'aac', 'mod', 'wma']:
                     mpd.add(d)
                 else:
-                    sock = urllib2.urlopen(d)
+                    sock = urllib.urlopen(d)
                     data = sock.read()
                     info = sock.info()
                     mime = info.gettype()
@@ -209,9 +213,9 @@ class Root:
         try:
             if len(args) == 1:
                 args = args[0]
-            print args
+            print(args)
             result = mpd.execute(args)
-        except MPDError, e:
+        except MPDError as e:
             raise cherrypy.HTTPError(501, message=str(e))
         return json.dumps(result)
     default.exposed = True
@@ -243,17 +247,17 @@ class Root:
                 tags['discnumber'] = val
             else:
                 tags[tag] = val
-            print '%s[%s] = "%s"' % (id, tag, val)
+            print ('%s[%s] = "%s"'.format(id, tag, val))
 
-        f = metadata.get_format(loc)
-        f.write_tags(tags)
+        #f = metadata.get_format(loc)
+        #f.write_tags(tags)
 
         updating = False
         while not updating:
             try:
                 mpd.update(id)
                 updating = True
-            except MPDError, e:
+            except MPDError as e:
                 if str(e) == "[54@0] {update} already updating":
                     sleep(0.01)
                 else:
@@ -344,7 +348,7 @@ class Root:
         file_path = os.path.join(cache_path, title + ".html")
         if os.path.exists(cache_path):
             if os.path.exists(file_path):
-                print "====USING CACHE==="
+                print ("====USING CACHE===")
                 with open(file_path, 'r') as f:
                     return f.read()
         else:
@@ -365,8 +369,8 @@ class Root:
             while retry < 3 and r is None:
                 try:
                     r = requests.get(url, params=p)
-                except Exception, err:
-                    print "%s: \n    Retry %s\n    %s" % (url, retry, err)
+                except Exception as err:
+                    print ("%s: \n    Retry %s\n    %s" % (url, retry, err))
                     retry += 1
                     sleep(5.0)
             if r is None:
@@ -394,14 +398,14 @@ class Root:
                     p = page.find("p")
                     p.img.decompose()
                     result = str(p)
-                    print "====GOT RESULT==="
+                    print("====GOT RESULT===")
         except:
             return "Not Found"
         
         with open(file_path, 'w') as f:
-            print "====SAVING CACHE==="
+            print("====SAVING CACHE===")
             f.write(result)
-        print result
+        print(result)
         return result
     lyrics.exposed = True
 
@@ -507,7 +511,7 @@ class Root:
         """
         try:
             return mpd.raw(cmd)
-        except MPDError, e:
+        except MPDError as e:
             raise cherrypy.HTTPError(501, message=str(e))
     protocol.exposed = True
 
@@ -577,9 +581,9 @@ class Root:
             return json.dumps(s)
         n = 0
         while n < 50:
-            if mpd.state.get('uptime', '') <> client_uptime:
+            if mpd.state.get('uptime', '') != client_uptime:
                 return json.dumps(mpd.state)
-            if mpd.state.get('updating_db', '') <> client_updating_db:
+            if mpd.state.get('updating_db', '') != client_updating_db:
                 return json.dumps(mpd.state)
             sleep(0.1)
             n += 1
@@ -683,7 +687,7 @@ root = Root()
 cherrypy.tree.mount(root, SERVER_ROOT)
 
 def cleanup():
-    print "     CLEANUP CALLED"
+    print("     CLEANUP CALLED")
     mpd.kill()
     
 
@@ -691,8 +695,8 @@ def serverless():
     """Start with no server (for mod_python or other WSGI HTTP servers).
 
     You can also use this mode interactively:
-        >>> import cpdeploy
-        >>> cpdeploy.serverless()
+    # >>> import cpdeploy
+    #>>> cpdeploy.serverless()
     """
     cherrypy.server.unsubscribe()
     cherrypy.config.update({
@@ -719,11 +723,11 @@ if __name__ == "__main__":
     if sport is None:
         sport = "8080"
 
-    print ""
-    print "=" * 60
-    print "Server Ready."
-    print "Client175 is available at:  http://%s:%s/%s" % (shost, sport, SERVER_ROOT)
-    print "=" * 60
-    print ""
+    print ("")
+    print ("=" * 60)
+    print ("Server Ready.")
+    print ("Client175 is available at:  http://{}:%s/%s".format(shost, sport, SERVER_ROOT))
+    print ("=" * 60)
+    print ("")
 
     serve()
