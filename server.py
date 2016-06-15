@@ -79,7 +79,7 @@ RUN_AS = cherrypy.config.get('run_as', RUN_AS)
 
 print("PORT {}".format(PORT))
 print("PASSWORD " + PASSWORD)
-mpd = mpd_proxy.Mpd(HOST,PORT,PASSWORD)
+mpd = mpd_proxy.Mpd(HOST, PORT, PASSWORD)
 
 mpd.include_playlist_counts = cherrypy.config.get('include_playlist_counts', True)
 cs = CoverSearch(COVERS_DIR, LOCAL_COVERS)
@@ -473,7 +473,7 @@ class Root:
 
         if data and kwargs.get('albumheaders'):
             result = []
-
+            data=list(data)
             def makeHeader(dg):
                 return {
                     'album': dg('album', 'Unknown'),

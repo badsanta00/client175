@@ -405,7 +405,7 @@ class MPDClient(object):
             try:
                 sock = socket.socket(af, socktype, proto)
                 sock.connect(sa)
-            except socket.error as msg:
+            except socket.error as msg2:
                 if sock:
                     sock.close()
                 sock = None

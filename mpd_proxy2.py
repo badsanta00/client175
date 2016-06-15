@@ -27,7 +27,7 @@ from copy import deepcopy
 import sys, traceback
 from functools import partial
 from xml.etree import ElementTree as ET
-
+from functools import cmp_to_key
 
 _Instance = None
 _Poller = None
@@ -173,12 +173,13 @@ class _Mpd_Instance:
                 if cached is not None:
                     return cached
                 data = fn(*args)
+                ldata = list(data)
                 self.lock.acquire()
                 try:
-                    self._dbcache[command] = data
+                    self._dbcache[command] = ldata
                 finally:
                     self.lock.release()
-                return data
+                return ldata
             return wrapper
         return fn
         
@@ -245,9 +246,7 @@ class _Mpd_Instance:
         useLower = False
         if sortKey not in ('time', 'pos', 'songs'):
             useLower = True
-        #result.sort(key=fieldSorter(sortKey, useLower))
-        #sorted_result=result
-        sorted_result = sorted(result, key=fieldSorter(sortKey), reverse=sortReverse)
+        sorted_result = sorted(result, key=cmp_to_key(fieldSorter(sortKey,useLower)), reverse=sortReverse)
         if command in self._cache_cmds:
             self.lock.acquire()
             try:
@@ -271,6 +270,7 @@ class _Mpd_Instance:
         item = self._playlistFiles.get(fpath, None)
         if item is None:
             pl = self.con.playlistfind('file', fpath)
+            pl = list(pl)
             if pl:
                 item = pl[0]
                 item['pos'] = int(item['pos']) + 1
