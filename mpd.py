@@ -20,8 +20,6 @@
 import socket, threading
 import logging
 
-logging.basicConfig(level=logging.DEBUG)
-
 HELLO_PREFIX = b'OK MPD '
 ERROR_PREFIX = 'ACK '
 SUCCESS = "OK"
@@ -66,8 +64,8 @@ def extend_file(item):
     
         
 def extend_database(item):
-    keys = item.keys()
-    logging.debug("extend database {}".format(keys))
+    keys = list(item.keys())
+    #logging.debug("extend database {}".format(keys))
     if 'file' in keys:
         item = extend_file(item)
     elif 'directory' in keys:
@@ -214,15 +212,15 @@ class MPDClient(object):
         logging.debug("execute {} {}".format(command, args))
         if self._command_list is None:
             if callable(retval):
-                return retval()
+                retval = retval()
+            if isinstance(retval,map):
+                retval = list(retval)
             return retval
         self._command_list.append(retval)
 
     def _write_line(self, line):
         line = "{}\n".format(line)
-        b = bytearray()
-        b.extend(map(ord, line))
-        self._wfile.write(b)
+        self._wfile.write(bytes(line, 'utf-8'))
         self._wfile.flush()
 
     def _write_command(self, command, args=[]):
@@ -374,7 +372,6 @@ class MPDClient(object):
     def _hello(self):
         line = self._rfile.readline()
         endof = line[-1:]
-        print (endof)
         if not (endof == b'\n'):
             raise ConnectionError("Connection lost while reading MPD hello")
         line = line[0:-1]

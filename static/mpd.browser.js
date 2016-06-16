@@ -1,5 +1,5 @@
 Ext.namespace('mpd.browser')
-mpd.PAGE_LIMIT = 200
+mpd.PAGE_LIMIT = 1000
 mpd.TAG_TYPES = ["Artist", "Album", "AlbumArtist", "Title", "Track", "Genre", "Date", "Composer", "Performer", "Disc"]
 mpd.TAG_TYPES_LOWER = ["artist", "album", "albumartist", "title", "track", "genre", "date", "composer", "performer", "disc"]
 mpd.EXTRA_FIELDS = []

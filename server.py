@@ -35,25 +35,32 @@ cherrypy.config.update( {
     'server.thread_pool': 10,
     'server.socket_host': '0.0.0.0'
 } )
+
 LOCAL_DIR = os.path.join(os.getcwd(), os.path.dirname(__file__))
+
 try:
     cherrypy.config.update(os.path.join(LOCAL_DIR, sys.argv[1]))
 except:
     cherrypy.config.update(os.path.join(LOCAL_DIR, "site.conf"))
 
-cherrypy.log.error_log.propagate = False
-cherrypy.log.access_log.propagate = False
+DEBUG_CHERRY = False
+DEBUG_BACKEND = False
 
 SERVER_ROOT = cherrypy.config.get('server_root', '/')
 MUSIC_DIR = cherrypy.config.get('music_directory', '/var/lib/mpd/music/')
 MUSIC_DIR = os.path.expanduser(MUSIC_DIR)
 COVERS_DIR = os.path.join(LOCAL_DIR, "static", "covers")
 LOCAL_COVERS = cherrypy.config.get('local_covers', None)
+
+if DEBUG_BACKEND:
+    logging.basicConfig(level=logging.DEBUG)
+
 if LOCAL_COVERS:
     for i in range(len(LOCAL_COVERS)):
         LOCAL_COVERS[i] = os.path.expanduser(LOCAL_COVERS[i])
 
 LYRICS_DIR = os.path.join(LOCAL_DIR, "static", "lyrics")
+
 if not os.path.exists(LYRICS_DIR):
     os.makedirs(LYRICS_DIR)
 
@@ -61,6 +68,8 @@ RUN_AS = "badsanta"
 HOST = "localhost"
 PORT = 6600
 PASSWORD = None
+
+ITEMS_PER_PAGE=1000
 
     #pwd.getpwuid(os.getuid())[0]
 #
@@ -81,13 +90,10 @@ PORT = cherrypy.config.get('mpd_port', PORT)
 PASSWORD = cherrypy.config.get('mpd_password', PASSWORD)
 RUN_AS = cherrypy.config.get('run_as', RUN_AS)
 
-print("PORT {}".format(PORT))
-print("PASSWORD " + PASSWORD)
 mpd = mpd_proxy.Mpd(HOST, PORT, PASSWORD)
 
 mpd.include_playlist_counts = cherrypy.config.get('include_playlist_counts', True)
 cs = CoverSearch(COVERS_DIR, LOCAL_COVERS)
-
 
 class Root:
 
@@ -98,6 +104,10 @@ class Root:
                 dir=os.path.join(LOCAL_DIR, "static"),
             )
 
+    def disable_cherrypy_logs(self):
+        access_log = cherrypy.log.access_log
+        for handler in tuple(access_log.handlers):
+            access_log.removeHandler(handler)
 
     def check_username_and_password(username, password):
         if username == password:
@@ -221,7 +231,6 @@ class Root:
         try:
             if len(args) == 1:
                 args = args[0]
-            print(args)
             result = mpd.execute(args)
         except MPDError as e:
             raise cherrypy.HTTPError(501, message=str(e))
@@ -481,7 +490,11 @@ class Root:
 
         if data and kwargs.get('albumheaders'):
             result = []
-            data=list(data)
+            data = list(data)
+            if len(data) == 0:
+                logging.error("playlistinfoext (albumheaders) : empty data")
+                return
+
             def makeHeader(dg):
                 return {
                     'album': dg('album', 'Unknown'),
@@ -653,7 +666,7 @@ class Root:
 
             if itemType == 'directory':
                 result = [x for x in data if x['type'] == itemType]
-            elif len(data) > 200:
+            elif len(data) > ITEMS_PER_PAGE:
                 result = []
                 iconCls = 'icon-group-unknown icon-group-'+itemType
                 cls = 'group-by-letter'
@@ -717,12 +730,19 @@ def serverless():
 
 def serve():
     """Start with the builtin server."""
-    cherrypy.config.update({'log.screen': True})
+
+    if DEBUG_CHERRY:
+        cherrypy.config.update({'log.screen': True})
+    else:
+        cherrypy.config.update({'log.screen': False})
+
+    cherrypy.log.access_log.disabled = True
+
     if hasattr(cherrypy.engine, 'signal_handler'):
         cherrypy.engine.signal_handler.subscribe()
         cherrypy.engine.subscribe("stop", cleanup)
-    cherrypy.engine.start()
 
+    cherrypy.engine.start()
 
 
 if __name__ == "__main__":
@@ -736,7 +756,7 @@ if __name__ == "__main__":
     print ("")
     print ("=" * 60)
     print ("Server Ready.")
-    print ("Client175 is available at:  http://{}:%s/%s".format(shost, sport, SERVER_ROOT))
+    print ("Client175 is available at:  http://{}:{}/{}".format(shost, sport, SERVER_ROOT))
     print ("=" * 60)
     print ("")
 

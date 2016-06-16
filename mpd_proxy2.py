@@ -273,6 +273,11 @@ class _Mpd_Instance:
             pl = self.con.playlistfind('file', fpath)
             logging.debug("getPlaylistByFile {}".format(pl))
             pl = list(pl)
+            # try:
+            #     pl = list(pl)
+            # except Exception as e:
+            #     logging.error("Error converting pl to list {}".format(str(e)))
+            #     return False
             logging.debug("getPlaylistByFile {}".format(pl))
             if pl:
                 item = pl[0]
@@ -374,7 +379,6 @@ class _Mpd_Instance:
             
             
     def load_xspf(self, data):
-        print(data)
         x = ET.XML(data)
         urls = x.findall(".//{http://xspf.org/ns/0/}location")
         for url in urls:
@@ -480,8 +484,7 @@ class _Mpd_Instance:
         try:
             if 'startup' in changes:
                 changes = ['database', 'playlist', 'stored_playlist']
-                
-            print(self.con._TAGS_LOWER)
+
             s = dict()
             for x in self.con._TAGS_LOWER:
                 s[x] = None
@@ -520,7 +523,6 @@ class _Mpd_Instance:
             self.lastcheck = datetime.utcnow()
             return self.state
         except Exception as e:
-            print(e)
             raise
         finally:
             self.lock.release()
