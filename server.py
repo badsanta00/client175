@@ -29,6 +29,7 @@ import mpd_proxy2 as mpd_proxy
 #from mpd import MPDError
 from covers import CoverSearch
 import requests
+import logging
 
 cherrypy.config.update( {
     'server.thread_pool': 10,
@@ -39,6 +40,9 @@ try:
     cherrypy.config.update(os.path.join(LOCAL_DIR, sys.argv[1]))
 except:
     cherrypy.config.update(os.path.join(LOCAL_DIR, "site.conf"))
+
+cherrypy.log.error_log.propagate = False
+cherrypy.log.access_log.propagate = False
 
 SERVER_ROOT = cherrypy.config.get('server_root', '/')
 MUSIC_DIR = cherrypy.config.get('music_directory', '/var/lib/mpd/music/')
@@ -132,7 +136,11 @@ class Root:
 
     def add(self, *args, **kwargs):
         if len(kwargs) > 0:
-            args = list(args) + kwargs.values()
+            args = list(args)
+            kargs = list(kwargs.values())
+            args.extend(kargs)
+        if args is None:
+            return
         if len(args) == 2:
             if args[0] in ('file', 'directory'):
                 d = args[1]
@@ -147,7 +155,7 @@ class Root:
                 mpd.findadd(args[0], args[1])
         else:
             d = args[0]
-            if d.startswith("/"):
+            if d[:1] == "/":
                 d = d[1:]
             if "://" in d[3:7]:
                 ext = d.split("?")[0].split(".")[-1]
@@ -619,7 +627,8 @@ class Root:
 
             root = {}
             loadChildren(root, '')
-            result = root['children']
+            if 'children' in root:
+                result = root['children']
         elif node == 'outputs:':
             result = []
             rawdata = mpd.outputs()
@@ -685,6 +694,7 @@ root = Root()
 #root.favicon_ico = tools.staticfile.handler(filename=favicon_path)
 
 cherrypy.tree.mount(root, SERVER_ROOT)
+
 
 def cleanup():
     print("     CLEANUP CALLED")

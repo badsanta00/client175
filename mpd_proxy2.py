@@ -28,6 +28,7 @@ import sys, traceback
 from functools import partial
 from xml.etree import ElementTree as ET
 from functools import cmp_to_key
+import logging
 
 _Instance = None
 _Poller = None
@@ -270,10 +271,15 @@ class _Mpd_Instance:
         item = self._playlistFiles.get(fpath, None)
         if item is None:
             pl = self.con.playlistfind('file', fpath)
+            logging.debug("getPlaylistByFile {}".format(pl))
             pl = list(pl)
+            logging.debug("getPlaylistByFile {}".format(pl))
             if pl:
                 item = pl[0]
-                item['pos'] = int(item['pos']) + 1
+                if 'pos' in item:
+                    item['pos'] = int(item['pos']) + 1
+                else:
+                    item['pos'] = 0
             else:
                 item = False
             self.lock.acquire()

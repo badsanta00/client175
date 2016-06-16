@@ -18,13 +18,15 @@
 # auto reconnect.
 
 import socket, threading
+import logging
 
+logging.basicConfig(level=logging.DEBUG)
 
 HELLO_PREFIX = b'OK MPD '
 ERROR_PREFIX = 'ACK '
 SUCCESS = "OK"
 NEXT = "list_OK"
-
+DEBUG = 1
 
 class MPDError(Exception):
     pass
@@ -65,6 +67,7 @@ def extend_file(item):
         
 def extend_database(item):
     keys = item.keys()
+    logging.debug("extend database {}".format(keys))
     if 'file' in keys:
         item = extend_file(item)
     elif 'directory' in keys:
@@ -208,6 +211,7 @@ class MPDClient(object):
         if self._command_list is not None and not callable(retval):
             raise CommandListError("%s not allowed in command list" % command)
         self._write_command(command, args)
+        logging.debug("execute {} {}".format(command, args))
         if self._command_list is None:
             if callable(retval):
                 return retval()
@@ -330,6 +334,7 @@ class MPDClient(object):
         read_line = self._read_line
         obj = {}
         line = read_line()
+        logging.debug("_read_songs : {}".format(line))
         m = self._TAGMAP.get
         while line is not None:
             try:
