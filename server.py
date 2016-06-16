@@ -37,6 +37,7 @@ cherrypy.config.update( {
 } )
 
 LOCAL_DIR = os.path.join(os.getcwd(), os.path.dirname(__file__))
+logging.basicConfig(level=logging.DEBUG)
 
 try:
     cherrypy.config.update(os.path.join(LOCAL_DIR, sys.argv[1]))
@@ -44,16 +45,16 @@ except:
     cherrypy.config.update(os.path.join(LOCAL_DIR, "site.conf"))
 
 DEBUG_CHERRY = False
-DEBUG_BACKEND = False
+DEBUG_BACKEND = True
+
+if DEBUG_BACKEND:
+    logging.basicConfig(level=logging.DEBUG)
 
 SERVER_ROOT = cherrypy.config.get('server_root', '/')
 MUSIC_DIR = cherrypy.config.get('music_directory', '/var/lib/mpd/music/')
 MUSIC_DIR = os.path.expanduser(MUSIC_DIR)
 COVERS_DIR = os.path.join(LOCAL_DIR, "static", "covers")
 LOCAL_COVERS = cherrypy.config.get('local_covers', None)
-
-if DEBUG_BACKEND:
-    logging.basicConfig(level=logging.DEBUG)
 
 if LOCAL_COVERS:
     for i in range(len(LOCAL_COVERS)):
@@ -731,16 +732,14 @@ def serverless():
 def serve():
     """Start with the builtin server."""
 
-    if DEBUG_CHERRY:
-        cherrypy.config.update({'log.screen': True})
-    else:
-        cherrypy.config.update({'log.screen': False})
+    cherrypy.config.update({'log.access_file': os.path.join(LOCAL_DIR, "access.log"),
+                            'log.error_file': os.path.join(LOCAL_DIR, "error.log")})
 
-    cherrypy.log.access_log.disabled = True
+    cherrypy.config.update({'log.screen': False})
 
-    if hasattr(cherrypy.engine, 'signal_handler'):
-        cherrypy.engine.signal_handler.subscribe()
-        cherrypy.engine.subscribe("stop", cleanup)
+    if not DEBUG_CHERRY:
+        cherrypy.log.error_log.propagate = False
+        cherrypy.log.access_log.propagate = False
 
     cherrypy.engine.start()
 
